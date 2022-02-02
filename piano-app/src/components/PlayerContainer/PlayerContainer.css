@@ -1,0 +1,10 @@
+.play-button {
+    height: 0;
+    border: 0 solid transparent;
+    border-bottom-width: 16px;
+    border-top-width: 16px;
+    border-left: 16px solid black;
+}
+.play-button:hover {
+    border-left: 16px solid #0369A1;
+}
