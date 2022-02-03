@@ -2,24 +2,24 @@ import React, { useContext, useEffect, useState } from 'react';
 import './KeyboardContainer.css';
 import WhiteKey from '../WhiteKey/WhiteKey';
 import BlackKey from '../BlackKey/BlackKey';
-import { notes, playNote } from './KeyboardContainer.utils';
+import { findNote, playNote } from './KeyboardContainer.utils';
 import { MyAudioContext } from '../../context/AudioContext/AudioContext';
 
 const KeyboardContainer = () => {
   const {audioContext} = useContext(MyAudioContext);
-  const {playRecording, setPlayRecording} = useContext(MyAudioContext);
+  const {isPlayRecording, setIsPlayRecording} = useContext(MyAudioContext);
   const {isRecording, setIsRecording} = useContext(MyAudioContext);
   const [oscillator, setOscillator] = useState<OscillatorNode>();
   const [record, setRecord] = useState<string[]>([]);
 
-  const play = (e: KeyboardEvent) => {
-    const currentNote = notes.find(element => element.key === e.key);
+  const play = ({key}: KeyboardEvent) => {
+    const currentNote = findNote(key);
     if (!currentNote) {
       return;
     }
     playNote(audioContext, currentNote.frequency);
     if (isRecording) {
-      record.push(e.key);
+      record.push(key);
       setRecord(record);
       localStorage.setItem('record', JSON.stringify(record));
     }
@@ -35,17 +35,17 @@ const KeyboardContainer = () => {
   }, [audioContext]);
 
   useEffect(() => {
-    if (playRecording) {
-      setPlayRecording(false);
+    if (isPlayRecording) {
+      setIsPlayRecording(false);
       record.forEach((key: string, index: number) => {
-        const currentNote = notes.find(element => element.key === key);
+        const currentNote = findNote(key);
         if (!currentNote) {
           return;
         }
         playNote(audioContext, currentNote.frequency, index / 2);
       });
     }
-  }, [audioContext, playRecording, setPlayRecording, record, setRecord]);
+  }, [audioContext, isPlayRecording, setIsPlayRecording, record, setRecord]);
 
   useEffect(() => {
     if (isRecording) {

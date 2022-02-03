@@ -1,4 +1,10 @@
-export const notes = [
+export type Note = {
+    label: string;
+    frequency: string;
+    key: string;
+};
+
+export const notes: Note[] = [
     {"label":"C4", "frequency":"261.63", "key": "q"},
     {"label":"C#3", "frequency":"277.18", "key": "2"},
     {"label":"D4","frequency":"293.66", "key": "w"},
@@ -23,3 +29,7 @@ export const playNote = (audioContext: AudioContext, freq: string, time = 0) => 
         osc.stop(audioContext.currentTime + 0.2 + time);
     }
 };
+
+export const findNote = (key: string): Note | undefined => {
+    return notes.find((element: Note) => element.key === key);
+}
