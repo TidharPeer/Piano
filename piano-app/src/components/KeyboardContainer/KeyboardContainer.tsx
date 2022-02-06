@@ -4,25 +4,48 @@ import WhiteKey from '../WhiteKey/WhiteKey';
 import BlackKey from '../BlackKey/BlackKey';
 import { findNote, playNote } from './KeyboardContainer.utils';
 import { MyAudioContext } from '../../context/AudioContext/AudioContext';
+import './KeyboardContainer.css';
 
 const KeyboardContainer = () => {
   const {audioContext} = useContext(MyAudioContext);
   const {isPlayRecording, setIsPlayRecording} = useContext(MyAudioContext);
   const {isRecording, setIsRecording} = useContext(MyAudioContext);
   const [oscillator, setOscillator] = useState<OscillatorNode>();
+  const [pressed, setPressed] = useState<boolean>(false);
   const [record, setRecord] = useState<string[]>([]);
 
   const play = ({key}: KeyboardEvent) => {
     const currentNote = findNote(key);
-    if (!currentNote) {
+
+    if (!currentNote || pressed) {
       return;
     }
-    playNote(audioContext, currentNote.frequency);
+
+    setPressed(true);
+    const osc = playNote(audioContext, currentNote.frequency);
+    setOscillator(osc);
     if (isRecording) {
       record.push(key);
       setRecord(record);
       localStorage.setItem('record', JSON.stringify(record));
     }
+
+    const element = document.getElementsByClassName(`keyboard-${key.toUpperCase()}`);
+    (element[0] as HTMLElement).classList.add('active');
+  }
+
+  const end = ({key}: KeyboardEvent) => {
+    if (oscillator) {
+      oscillator.stop();
+    }
+    setPressed(false);
+    const currentNote = findNote(key);
+    if (!currentNote) {
+      return;
+    }
+
+    const element = document.getElementsByClassName(`keyboard-${key.toUpperCase()}`);
+    (element[0] as HTMLElement).classList.remove('active');
   }
 
   useEffect(() => {
@@ -55,13 +78,15 @@ const KeyboardContainer = () => {
 
   useEffect(() => {
     window.addEventListener('keydown', play);
+    window.addEventListener('keyup', end);
     return () => {
       window.removeEventListener('keydown', play);
+      window.removeEventListener('keyup', end);
     }
-  }, [oscillator, isRecording, record]);
+  }, [oscillator, isRecording, record, pressed, setPressed, setOscillator]);
 
   return (
-    <div className='h-[256px] flex relative'>
+    <div className='h-[256px] flex relative keyboard-container'>
       <WhiteKey char='Q' onClick={() => play({key: 'q'} as any)} />
       <BlackKey char='2' onClick={() => play({key: '2'} as any)} />
       <WhiteKey char='W' className='ml-[-16px]' onClick={() => play({key: 'w'} as any)} />

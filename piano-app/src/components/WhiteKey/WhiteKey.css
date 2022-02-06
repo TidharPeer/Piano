@@ -6,3 +6,7 @@
 .white-key:hover {
   background: lightgray;
 }
+
+.white-key:active {
+  background: red;
+}

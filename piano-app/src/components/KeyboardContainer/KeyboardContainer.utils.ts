@@ -26,8 +26,10 @@ export const playNote = (audioContext: AudioContext, freq: string, time = 0) => 
         osc.frequency.value = parseInt(freq);
         osc.connect(audioContext.destination);
         osc.start(audioContext.currentTime + time);
-        osc.stop(audioContext.currentTime + 0.2 + time);
+        // osc.stop(audioContext.currentTime + 0.2 + time);
     }
+
+    return osc;
 };
 
 export const findNote = (key: string): Note | undefined => {
