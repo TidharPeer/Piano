@@ -1,18 +1,23 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import './KeyboardContainer.css';
 import WhiteKey from '../WhiteKey/WhiteKey';
 import BlackKey from '../BlackKey/BlackKey';
 import { notes, playNote } from './KeyboardContainer.utils';
-import { MyAudioContext } from '../../context/AudioContext/AudioContext';
+// import { MyAudioContext } from '../../context/AudioContext/AudioContext';
+import { getAudioContext, isPlayRecording$, isRecording$, updateIsPlayRecording } from '../../state/audio.store';
+import { useObservable } from '@ngneat/use-observable';
 
 const KeyboardContainer = () => {
-  const {audioContext} = useContext(MyAudioContext);
-  const {playRecording, setPlayRecording} = useContext(MyAudioContext);
-  const {isRecording, setIsRecording} = useContext(MyAudioContext);
+  // const {audioContext} = useContext(MyAudioContext);
+  const audioContext = getAudioContext;
+  // const {playRecording, setPlayRecording} = useContext(MyAudioContext);
+  const [playRecording] = useObservable(isPlayRecording$);
+  // const {isRecording, setIsRecording} = useContext(MyAudioContext);
+  const [isRecording] = useObservable(isRecording$);
   const [oscillator, setOscillator] = useState<OscillatorNode>();
   const [record, setRecord] = useState<string[]>([]);
 
-  const play = (e: KeyboardEvent) => {
+  const play = useCallback((e: KeyboardEvent) => {
     const currentNote = notes.find(element => element.key === e.key);
     if (!currentNote) {
       return;
@@ -23,7 +28,7 @@ const KeyboardContainer = () => {
       setRecord(record);
       localStorage.setItem('record', JSON.stringify(record));
     }
-  }
+  }, [audioContext, record, isRecording]);
 
   useEffect(() => {
     const osc = audioContext.createOscillator();
@@ -36,7 +41,7 @@ const KeyboardContainer = () => {
 
   useEffect(() => {
     if (playRecording) {
-      setPlayRecording(false);
+      updateIsPlayRecording(false);
       record.forEach((key: string, index: number) => {
         const currentNote = notes.find(element => element.key === key);
         if (!currentNote) {
@@ -45,20 +50,20 @@ const KeyboardContainer = () => {
         playNote(audioContext, currentNote.frequency, index / 2);
       });
     }
-  }, [audioContext, playRecording, setPlayRecording, record, setRecord]);
+  }, [audioContext, playRecording, record]);
 
   useEffect(() => {
     if (isRecording) {
       setRecord([]);
     }
-  }, [isRecording, setIsRecording]);
+  }, [isRecording]);
 
   useEffect(() => {
     window.addEventListener('keydown', play);
     return () => {
       window.removeEventListener('keydown', play);
     }
-  }, [oscillator, isRecording, record]);
+  }, [oscillator, isRecording, record, play]);
 
   return (
     <div className='h-[256px] flex relative'>

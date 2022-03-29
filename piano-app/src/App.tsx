@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 import KeyboardContainer from './components/KeyboardContainer/KeyboardContainer';
-import { AudioProvider } from './context/AudioContext/AudioContext';
+// import { AudioProvider } from './context/AudioContext/AudioContext';
 import PlayerContainer from './components/PlayerContainer/PlayerContainer';
 
 const App = () => {
@@ -11,12 +11,10 @@ const App = () => {
         Piano App!
       </h1>
       <div className='h-full'>
-        <AudioProvider>
-          <div className='flex flex-col h-full justify-center items-center'>
-            <PlayerContainer />
-            <KeyboardContainer />
-          </div>
-        </AudioProvider>
+        <div className='flex flex-col h-full justify-center items-center'>
+          <PlayerContainer />
+          <KeyboardContainer />
+        </div>
       </div>
     </div>
   );
